@@ -1,0 +1,22 @@
+[package]
+name = "t212-cli"
+description = "T212 Portfolio command line interface"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "t212"
+path = "src/main.rs"
+
+[dependencies]
+t212-core = { path = "../t212-core" }
+t212-api = { path = "../t212-api" }
+t212-creds = { path = "../t212-creds" }
+t212-mcp = { path = "../t212-mcp" }
+serde_json.workspace = true
+rust_decimal.workspace = true
+rpassword = "7"
+
+[lints]
+workspace = true

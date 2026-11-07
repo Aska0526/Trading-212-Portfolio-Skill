@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T212 Portfolio</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: var(--color-background-primary, light-dark(#ffffff, #171717));
+    --card: var(--color-background-secondary, light-dark(#f6f7f9, #212121));
+    --text: var(--color-text-primary, light-dark(#171717, #f5f5f5));
+    --muted: var(--color-text-secondary, light-dark(#6b7280, #a3a3a3));
+    --border: var(--color-border-primary, light-dark(#e5e7eb, #333333));
+    --up: #16a34a; --down: #dc2626;
+    --c1: #0ea5e9; --c2: #22c55e; --c3: #a855f7; --c4: #f59e0b;
+    --c5: #ef4444; --c6: #14b8a6; --c7: #6366f1; --c8: #ec4899; --c9: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--text);
+         font: 14px/1.4 var(--font-sans, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif); }
+  h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+  .head .title { font-size: 16px; font-weight: 650; }
+  .head .meta { color: var(--muted); font-size: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .kpi .label { color: var(--muted); font-size: 12px; }
+  .kpi .value { font-size: 20px; font-weight: 650; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .kpi .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .grid { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.6fr); gap: 12px; }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+  .donut-wrap { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .legend { list-style: none; margin: 0; padding: 0; font-size: 12px; flex: 1; min-width: 120px; }
+  .legend li { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+  .legend .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .legend .pct { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .keys { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .keys span::before { content: ""; display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: middle; background: var(--k); }
+  .note { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  .empty { color: var(--muted); font-size: 13px; padding: 24px 0; text-align: center; }
+  svg text { fill: var(--muted); font-size: 10px; }
+</style>
+</head>
+<body>
+<div id="app"><div class="empty" id="loading"></div></div>
+<script>
+(() => {
+  "use strict";
+  const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6","--c7","--c8","--c9"].map(v => `var(${v})`);
+  const NS = "http://www.w3.org/2000/svg";
+  let rendered = false;
+
+  // Labels follow the host locale (hosts mirror it to <html lang>).
+  const ZH = /^zh/i.test(document.documentElement.lang || navigator.language || "");
+  const L = ZH ? {
+    loading: "正在加载投资组合…", title: "Trading 212 投资组合", asOf: "截至", holdings: "持仓", overTime: "历史走势",
+    totalValue: "总价值", cash: "现金", unrealised: "未实现盈亏", cost: "成本", gain: "相对存入收益", histNA: "暂无历史数据",
+    mwr: "资金加权收益率", perYear: " / 年", since: "自", estimate: "估算", na: "暂不可用", positions: "个持仓",
+    other: "其他", noHoldings: "没有可计算市值的持仓。", allocNote: "占投资市值比例，不含现金。集中度（HHI）",
+    deposits: "净存入", dividends: "分红", realised: "已实现盈亏", noHistory: "暂无历史数据。",
+    tlNote: "根据 Trading 212 历史记录累计计算。Trading 212 不提供历史账户价值。", footer: "Trading 212 数据只读视图，不构成投资建议。"
+  } : {
+    loading: "Loading portfolio…", title: "Trading 212 Portfolio", asOf: "as of", holdings: "Holdings", overTime: "Over time",
+    totalValue: "Total value", cash: "Cash", unrealised: "Unrealised P&L", cost: "Cost", gain: "Gain vs deposits", histNA: "history unavailable",
+    mwr: "Money-weighted return", perYear: " / yr", since: "since", estimate: "estimate", na: "not available", positions: "positions",
+    other: "Other", noHoldings: "No holdings with a market value.", allocNote: "Share of invested value, cash excluded. Concentration (HHI)",
+    deposits: "Net deposits", dividends: "Dividends", realised: "Realised P&L", noHistory: "No history available yet.",
+    tlNote: "Cumulative totals from Trading 212 history. Trading 212 doesn't provide past portfolio values.", footer: "Read-only view of your Trading 212 data. Not investment advice."
+  };
+
+  document.getElementById("loading").textContent = L.loading;
+
+  // ---------- tiny DOM helpers (textContent only; data is untrusted) ----------
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") n.className = v; else if (k === "style") n.style.cssText = v; else n.setAttribute(k, v);
+    }
+    for (const k of kids) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
+    return n;
+  }
+  function svg(tag, attrs, ...kids) {
+    const n = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, String(v));
+    for (const k of kids) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
+    return n;
+  }
+  const num = v => { const x = Number(v); return Number.isFinite(x) ? x : null; };
+  function money(v, ccy) {
+    const x = num(v); if (x === null) return "—";
+    try { return new Intl.NumberFormat(undefined, { style: "currency", currency: ccy, maximumFractionDigits: 2 }).format(x); }
+    catch { return x.toFixed(2) + " " + ccy; }
+  }
+  const pct = v => { const x = num(v); return x === null ? "—" : (x * 100).toFixed(1) + "%"; };
+  const sign = v => { const x = num(v); return x === null ? "" : x >= 0 ? "up" : "down"; };
+
+  // ---------- pieces ----------
+  function kpi(label, value, sub, cls) {
+    return el("div", { class: "card kpi" },
+      el("div", { class: "label" }, label),
+      el("div", { class: "value " + (cls || "") }, value),
+      sub ? el("div", { class: "sub" }, sub) : "");
+  }
+
+  function donut(alloc) {
+    const card = el("div", { class: "card" }, el("h2", {}, L.holdings));
+    if (!alloc || alloc.status !== "available" || !alloc.weights?.length) {
+      card.append(el("div", { class: "empty" }, alloc?.reason || L.noHoldings));
+      return card;
+    }
+    const ws = [...alloc.weights].sort((a, b) => num(b.weight) - num(a.weight));
+    const top = ws.slice(0, 8);
+    const rest = ws.slice(8).reduce((s, w) => s + num(w.weight), 0);
+    if (rest > 0) top.push({ ticker: `${L.other} (${ws.length - 8})`, weight: rest });
+    const R = 54, r = 34, C = 64;
+    const g = svg("svg", { viewBox: "0 0 128 128", width: 128, height: 128, role: "img", "aria-label": "Holdings by weight" });
+    let a0 = -Math.PI / 2;
+    top.forEach((w, i) => {
+      const f = Math.max(0, Math.min(1, num(w.weight)));
+      if (f <= 0) return;
+      const a1 = a0 + f * 2 * Math.PI - (f >= 1 ? 1e-4 : 0);
+      const large = a1 - a0 > Math.PI ? 1 : 0;
+      const p = (rad, ang) => `${C + rad * Math.cos(ang)} ${C + rad * Math.sin(ang)}`;
+      const d = `M ${p(R, a0)} A ${R} ${R} 0 ${large} 1 ${p(R, a1)} L ${p(r, a1)} A ${r} ${r} 0 ${large} 0 ${p(r, a0)} Z`;
+      g.append(svg("path", { d, fill: COLORS[i % COLORS.length] }, svg("title", {}, `${w.ticker}: ${pct(w.weight)}`)));
+      a0 = a1;
+    });
+    g.append(svg("text", { x: C, y: C - 2, "text-anchor": "middle", style: "font-size:15px;font-weight:650;fill:var(--text)" }, String(ws.length)));
+    g.append(svg("text", { x: C, y: C + 12, "text-anchor": "middle" }, L.positions));
+    const legend = el("ul", { class: "legend" });
+    top.forEach((w, i) => legend.append(el("li", {},
+      el("span", { class: "sw", style: `background:${COLORS[i % COLORS.length]}` }),
+      String(w.ticker).replace(/_[A-Z]{2}_EQ$|_EQ$/, ""), el("span", { class: "pct" }, pct(w.weight)))));
+    card.append(el("div", { class: "donut-wrap" }, g, legend));
+    card.append(el("div", { class: "note" }, `${L.allocNote} ${num(alloc.hhi)?.toFixed(3) ?? "—"}.`));
+    return card;
+  }
+
+  function lines(tl, ccy) {
+    const card = el("div", { class: "card" }, el("h2", {}, L.overTime));
+    const defs = [
+      [L.deposits, tl?.net_deposits, "var(--c1)"],
+      [L.dividends, tl?.dividends, "var(--c2)"],
+      [L.realised, tl?.realised_pl, "var(--c3)"],
+    ].filter(([, b]) => b && b.status === "available" && b.points?.length);
+    if (!defs.length) {
+      card.append(el("div", { class: "empty" }, "No history available yet."));
+      return card;
+    }
+    const t = s => Date.parse(s + "T00:00:00Z");
+    const now = Date.now();
+    let tMin = Infinity, vMin = 0, vMax = 0;
+    for (const [, b] of defs) for (const p of b.points) {
+      tMin = Math.min(tMin, t(p.date)); const v = num(p.value) ?? 0; vMin = Math.min(vMin, v); vMax = Math.max(vMax, v);
+    }
+    if (!(tMin < now)) tMin = now - 86400000;
+    if (vMax === vMin) vMax = vMin + 1;
+    const W = 420, H = 190, PL = 48, Rm = 8, T = 8, B = 22;
+    const x = ts => PL + (ts - tMin) / (now - tMin) * (W - PL - Rm);
+    const y = v => T + (vMax - v) / (vMax - vMin) * (H - T - B);
+    const g = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img", "aria-label": "Cumulative net deposits, dividends and realised profit over time" });
+    for (let i = 0; i <= 3; i++) {
+      const v = vMin + (vMax - vMin) * i / 3, yy = y(v);
+      g.append(svg("line", { x1: PL, x2: W - Rm, y1: yy, y2: yy, stroke: "var(--border)", "stroke-width": 1 }));
+      g.append(svg("text", { x: PL - 6, y: yy + 3, "text-anchor": "end" }, compact(v)));
+    }
+    const y0 = new Date(tMin).getUTCFullYear(), y1 = new Date(now).getUTCFullYear();
+    const step = Math.max(1, Math.ceil((y1 - y0 + 1) / 6));
+    for (let yr = y0; yr <= y1; yr += step) {
+      const ts = Date.UTC(yr, 0, 1); if (ts < tMin) continue;
+      g.append(svg("text", { x: x(ts), y: H - 6, "text-anchor": "middle" }, String(yr)));
+    }
+    for (const [label, b, color] of defs) {
+      // Step line: cumulative value holds until the next event, then to today.
+      let d = "", prev = null;
+      for (const p of b.points) {
+        const xx = x(t(p.date)), yy = y(num(p.value) ?? 0);
+        d += prev === null ? `M ${x(tMin)} ${y(0)} H ${xx} V ${yy}` : ` H ${xx} V ${yy}`;
+        prev = yy;
+      }
+      d += ` H ${x(now)}`;
+      g.append(svg("path", { d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }, svg("title", {}, `${label}: ${money(b.total, ccy)}`)));
+    }
+    card.append(g);
+    const keys = el("div", { class: "keys" });
+    for (const [label, b, color] of defs) keys.append(el("span", { style: `--k:${color}` }, `${label} ${money(b.total, ccy)}`));
+    card.append(keys);
+    card.append(el("div", { class: "note" }, L.tlNote));
+    return card;
+  }
+
+  function compact(v) {
+    const a = Math.abs(v);
+    return a >= 1e6 ? (v / 1e6).toFixed(1) + "m" : a >= 1e3 ? (v / 1e3).toFixed(a >= 1e4 ? 0 : 1) + "k" : v.toFixed(0);
+  }
+
+  // ---------- render ----------
+  function render(data) {
+    if (!data || typeof data !== "object" || !data.summary) return;
+    rendered = true;
+    const s = data.summary, ccy = s.currency || "GBP", perf = data.performance || {};
+    const root = document.getElementById("app");
+    root.replaceChildren();
+    root.append(el("div", { class: "head" },
+      el("div", { class: "title" }, L.title),
+      el("div", { class: "meta" }, `${ccy} · ${L.asOf} ${String(s.provenance?.as_of || "").replace("T", " ").replace("Z", " UTC")}`)));
+    const gain = perf.total_gain, mwr = perf.money_weighted_return;
+    root.append(el("div", { class: "kpis" },
+      kpi(L.totalValue, money(s.total_value?.amount, ccy), `${L.cash} ${money(s.cash_available_to_trade?.amount, ccy)}`),
+      kpi(L.unrealised, money(s.investments_unrealized_pl?.amount, ccy), `${L.cost} ${money(s.investments_total_cost?.amount, ccy)}`, sign(s.investments_unrealized_pl?.amount)),
+      gain?.status === "available"
+        ? kpi(L.gain, money(gain.amount, ccy), gain.fraction_of_contributions != null ? pct(gain.fraction_of_contributions) : "", sign(gain.amount))
+        : kpi(L.gain, "—", L.histNA),
+      mwr?.status === "available"
+        ? kpi(L.mwr, pct(mwr.annualised_rate) + L.perYear, `${L.since} ${mwr.period_start} · ${L.estimate}`, sign(mwr.annualised_rate))
+        : kpi(L.mwr, "—", L.na)));
+    root.append(el("div", { class: "grid" }, donut(data.allocation), lines(data.timeline, ccy)));
+    root.append(el("div", { class: "note" }, L.footer));
+    notifySize();
+  }
+
+  // ---------- MCP Apps bridge (JSON-RPC over postMessage) ----------
+  let nextId = 1;
+  const post = msg => window.parent.postMessage(Object.assign({ jsonrpc: "2.0" }, msg), "*");
+  function notifySize() {
+    const r = document.documentElement.getBoundingClientRect();
+    post({ method: "ui/notifications/size-changed", params: { width: Math.ceil(r.width), height: Math.ceil(r.height) } });
+  }
+  window.addEventListener("message", ev => {
+    if (ev.source !== window.parent) return;
+    const m = ev.data;
+    if (!m || m.jsonrpc !== "2.0") return;
+    if (m.id === 1 && m.result) {
+      const vars = m.result.hostContext?.styles?.variables || {};
+      for (const [k, v] of Object.entries(vars)) if (typeof v === "string" && k.startsWith("--")) document.documentElement.style.setProperty(k, v);
+      post({ method: "ui/notifications/initialized", params: {} });
+    } else if (m.method === "ui/notifications/tool-result") {
+      render(m.params?.structuredContent);
+    }
+  });
+  post({ id: nextId++, method: "ui/initialize", params: {
+    protocolVersion: "2026-01-26",
+    appCapabilities: { availableDisplayModes: ["inline"] },
+    appInfo: { name: "t212-portfolio-dashboard", version: "1.0.0" }
+  } });
+  // ChatGPT compatibility: data may also be exposed as window.openai.toolOutput.
+  const tryOpenAI = () => { if (!rendered && window.openai?.toolOutput) render(window.openai.toolOutput); };
+  window.addEventListener("openai:set_globals", tryOpenAI);
+  tryOpenAI();
+  if (typeof ResizeObserver === "function") new ResizeObserver(notifySize).observe(document.body);
+  // Local preview: dashboard.html#preview=<base64 json>
+  const pv = location.hash.match(/^#preview=(.+)$/);
+  if (pv) { try { render(JSON.parse(atob(decodeURIComponent(pv[1])))); } catch {} }
+})();
+</script>
+</body>
+</html>

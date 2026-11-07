@@ -1,0 +1,205 @@
+{
+  "contract_version": "0.3.0",
+  "account": {
+    "currency": "GBP",
+    "total_value": {
+      "amount": "1050.00",
+      "currency": "GBP"
+    },
+    "cash_available_to_trade": {
+      "amount": "50.00",
+      "currency": "GBP"
+    },
+    "cash_in_pies": {
+      "amount": "0",
+      "currency": "GBP"
+    },
+    "cash_reserved_for_orders": {
+      "amount": "0",
+      "currency": "GBP"
+    },
+    "investments_current_value": {
+      "amount": "1000.00",
+      "currency": "GBP"
+    },
+    "investments_total_cost": {
+      "amount": "900.00",
+      "currency": "GBP"
+    },
+    "investments_unrealized_pl": {
+      "amount": "100.00",
+      "currency": "GBP"
+    },
+    "investments_realized_pl": {
+      "amount": "10.00",
+      "currency": "GBP"
+    },
+    "provenance": {
+      "source": "mock-fixture",
+      "as_of": "2026-01-01T00:00:00Z",
+      "completeness": "complete",
+      "stale": false
+    }
+  },
+  "positions": {
+    "positions": [
+      {
+        "ticker": "AAA_US_EQ",
+        "name": "Alpha Corp",
+        "quantity": "10",
+        "market_value": {
+          "amount": "600.00",
+          "currency": "GBP"
+        },
+        "total_cost": {
+          "amount": "500.00",
+          "currency": "GBP"
+        },
+        "unrealized_pl": {
+          "amount": "100.00",
+          "currency": "GBP"
+        }
+      },
+      {
+        "ticker": "BBB_US_EQ",
+        "name": "Beta Inc",
+        "quantity": "5.5",
+        "market_value": {
+          "amount": "300.00",
+          "currency": "GBP"
+        },
+        "total_cost": {
+          "amount": "300.00",
+          "currency": "GBP"
+        },
+        "unrealized_pl": {
+          "amount": "0.00",
+          "currency": "GBP"
+        }
+      },
+      {
+        "ticker": "CCC_US_EQ",
+        "name": "Gamma Ltd",
+        "quantity": "2",
+        "market_value": {
+          "amount": "100.00",
+          "currency": "GBP"
+        },
+        "total_cost": {
+          "amount": "100.00",
+          "currency": "GBP"
+        },
+        "unrealized_pl": {
+          "amount": "0.00",
+          "currency": "GBP"
+        }
+      },
+      {
+        "ticker": "NOVAL",
+        "name": null,
+        "quantity": "1",
+        "market_value": null,
+        "total_cost": null,
+        "unrealized_pl": null
+      }
+    ],
+    "provenance": {
+      "source": "mock-fixture",
+      "as_of": "2026-01-01T00:00:00Z",
+      "completeness": "partial",
+      "stale": false
+    }
+  },
+  "transactions": {
+    "items": [
+      {
+        "date_time": "2025-01-01T09:00:00Z",
+        "kind": "DEPOSIT",
+        "amount": {
+          "amount": "800.00",
+          "currency": "GBP"
+        }
+      },
+      {
+        "date_time": "2025-07-01T09:00:00Z",
+        "kind": "DEPOSIT",
+        "amount": {
+          "amount": "200.00",
+          "currency": "GBP"
+        }
+      },
+      {
+        "date_time": "2025-10-01T09:00:00Z",
+        "kind": "WITHDRAW",
+        "amount": {
+          "amount": "-100.00",
+          "currency": "GBP"
+        }
+      },
+      {
+        "date_time": "2025-11-01T00:00:00Z",
+        "kind": "INTEREST_ON_FREE_CASH",
+        "amount": {
+          "amount": "1.20",
+          "currency": "GBP"
+        }
+      }
+    ],
+    "provenance": {
+      "source": "mock-fixture",
+      "as_of": "2026-01-01T00:00:00Z",
+      "completeness": "complete",
+      "stale": false
+    }
+  },
+  "dividends": {
+    "items": [
+      {
+        "paid_on": "2025-06-15T00:00:00Z",
+        "ticker": "AAA_US_EQ",
+        "kind": "ORDINARY",
+        "amount": {
+          "amount": "4.10",
+          "currency": "GBP"
+        }
+      },
+      {
+        "paid_on": "2025-12-15T00:00:00Z",
+        "ticker": "AAA_US_EQ",
+        "kind": "ORDINARY",
+        "amount": {
+          "amount": "4.30",
+          "currency": "GBP"
+        }
+      }
+    ],
+    "provenance": {
+      "source": "mock-fixture",
+      "as_of": "2026-01-01T00:00:00Z",
+      "completeness": "complete",
+      "stale": false
+    }
+  },
+  "fills": {
+    "items": [
+      {
+        "filled_at": "2025-01-02T14:30:00Z",
+        "ticker": "AAA_US_EQ",
+        "side": "BUY",
+        "quantity": "10",
+        "price": "60.5",
+        "net_value": {
+          "amount": "-500.00",
+          "currency": "GBP"
+        },
+        "realised_pl": null
+      }
+    ],
+    "provenance": {
+      "source": "mock-fixture",
+      "as_of": "2026-01-01T00:00:00Z",
+      "completeness": "complete",
+      "stale": false
+    }
+  }
+}

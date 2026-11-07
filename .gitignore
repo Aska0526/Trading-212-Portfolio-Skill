@@ -1,0 +1,7 @@
+/target
+.DS_Store
+*.zip
+
+# Personal planning notes (kept locally, not published)
+/.kiro/
+/docs/

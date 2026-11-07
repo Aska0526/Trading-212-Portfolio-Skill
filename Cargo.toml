@@ -1,0 +1,24 @@
+[workspace]
+resolver = "2"
+members = ["crates/t212-core", "crates/t212-api", "crates/t212-creds", "crates/t212-mcp", "crates/t212-cli"]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+license = "MIT"
+rust-version = "1.82"
+repository = "https://github.com/Aska0526/Trading-212-Portfolio-Skill"
+
+[workspace.dependencies]
+rust_decimal = { version = "1.36", default-features = false, features = ["std", "serde-str"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

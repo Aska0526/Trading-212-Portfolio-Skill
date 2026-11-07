@@ -1,0 +1,20 @@
+[package]
+name = "t212-creds"
+description = "OS credential store access for T212 Portfolio (fails closed)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+t212-core = { path = "../t212-core" }
+t212-api = { path = "../t212-api" }
+serde.workspace = true
+serde_json.workspace = true
+
+[target.'cfg(target_os = "windows")'.dependencies]
+keyring = { version = "3", default-features = false, features = ["windows-native"] }
+[target.'cfg(target_os = "linux")'.dependencies]
+keyring = { version = "3", default-features = false, features = ["sync-secret-service", "crypto-rust"] }
+
+[lints]
+workspace = true
